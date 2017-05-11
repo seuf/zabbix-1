@@ -35,6 +35,7 @@ const (
 	SourceInternalUnknown         EventValueType = 1
 )
 
+// https://www.zabbix.com/documentation/2.4/manual/api/reference/event/get?s[]=acknowledgeid
 type Acknowledge struct {
 	AcknowledgeId string `json:"acknowledgeid"`
 	Alias         string `json:"alias,omitempty"`
@@ -48,6 +49,7 @@ type Acknowledge struct {
 
 type Acknowledges []Acknowledge
 
+// https://www.zabbix.com/documentation/2.2/manual/api/reference/event/object
 type Event struct {
 	Acknowledged int          `json:"acknowledged"`
 	Acknowledges Acknowledges `json:"acknowledges,omitempty"`
