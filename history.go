@@ -2,6 +2,7 @@ package zabbix
 
 import "github.com/AlekSi/reflector"
 
+// https://www.zabbix.com/documentation/2.4/manual/api/reference/history/object
 type History struct {
 	Clock  uint   `json:"clock"`
 	ItemId string `json:"itemid"`
