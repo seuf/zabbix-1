@@ -35,11 +35,11 @@ const (
 	SourceInternalUnknown         EventValueType = 1
 )
 
-// https://www.zabbix.com/documentation/2.4/manual/api/reference/event/get?s[]=acknowledgeid
+// Acknowledge struct from https://www.zabbix.com/documentation/2.4/manual/api/reference/event/get?s[]=acknowledgeid
 type Acknowledge struct {
 	AcknowledgeId string `json:"acknowledgeid"`
 	Alias         string `json:"alias,omitempty"`
-	Clock         uint   `json:"clock"`
+	Clock         int64  `json:"clock"`
 	EventId       string `json:"eventid"`
 	Message       string `json:"message"`
 	Name          string `json:"name,omitempty"`
@@ -49,13 +49,13 @@ type Acknowledge struct {
 
 type Acknowledges []Acknowledge
 
-// https://www.zabbix.com/documentation/2.2/manual/api/reference/event/object
+// Event struct from https://www.zabbix.com/documentation/2.4/manual/api/reference/event/object
 type Event struct {
 	Acknowledged int          `json:"acknowledged"`
 	Acknowledges Acknowledges `json:"acknowledges,omitempty"`
-	Clock        uint         `json:"clock"`
+	Clock        int64        `json:"clock"`
 	EventId      string       `json:"eventid"`
-	Ns           uint64       `json:"ns"`
+	Ns           int64        `json:"ns"`
 	Object       ObjectType   `json:"object"`
 	ObjectId     string       `json:"objectid"`
 	Source       SourceType   `json:"source"`
@@ -65,6 +65,7 @@ type Event struct {
 
 type Events []Event
 
+// EventsGet gets all events https://www.zabbix.com/documentation/2.4/manual/api/reference/event/get
 func (api *API) EventsGet(params Params) (res Events, err error) {
 	if _, present := params["output"]; !present {
 		params["output"] = "extend"
@@ -86,5 +87,24 @@ func (api *API) EventsGet(params Params) (res Events, err error) {
 		}
 	}
 
+	return
+}
+
+// EventsGetByID gets an event by item ID
+func (api *API) EventsGetByID(id string) (res Events, err error) {
+	return api.EventsGet(Params{"eventids": id, "select_acknowledges": "extend"})
+}
+
+// EventsGetByTriggerID gets an event by item ID, default source = 0 (triggers)
+func (api *API) EventsGetByTriggerID(id string) (res Events, err error) {
+	return api.EventsGet(Params{"objectids": id})
+}
+
+// EventsAckByID acknowledges event using id and text message - https://www.zabbix.com/documentation/2.4/manual/api/reference/event/acknowledge
+func (api *API) EventsAckByID(id string, message string) (err error) {
+	_, err = api.CallWithError("event.acknowledge", Params{"eventids": id, "message": message})
+	if err != nil {
+		return
+	}
 	return
 }
