@@ -15,17 +15,20 @@ const (
 
 	Monitored   StatusType = 0
 	Unmonitored StatusType = 1
+
+	NotInMaint StatusType = 0
+	InMaint    StatusType = 1
 )
 
-// https://www.zabbix.com/documentation/2.2/manual/appendix/api/host/definitions
+// Host definition by https://www.zabbix.com/documentation/2.4/manual/api/reference/host/object
 type Host struct {
-	HostId    string        `json:"hostid,omitempty"`
-	Host      string        `json:"host"`
-	Available AvailableType `json:"available"`
-	Error     string        `json:"error"`
-	Name      string        `json:"name"`
-	Status    StatusType    `json:"status"`
-
+	HostId      string        `json:"hostid,omitempty"`
+	Host        string        `json:"host"`
+	Available   AvailableType `json:"available"`
+	Error       string        `json:"error"`
+	Name        string        `json:"name"`
+	Status      StatusType    `json:"status"`
+	MaintStatus StatusType    `json:"maintenance_status"`
 	// Fields below used only when creating hosts
 	GroupIds   HostGroupIds   `json:"groups,omitempty"`
 	Interfaces HostInterfaces `json:"interfaces,omitempty"`
@@ -33,7 +36,7 @@ type Host struct {
 
 type Hosts []Host
 
-// Wrapper for host.get: https://www.zabbix.com/documentation/2.2/manual/appendix/api/host/get
+// HostsGet is a wrapper for host.get: https://www.zabbix.com/documentation/2.2/manual/appendix/api/host/get
 func (api *API) HostsGet(params Params) (res Hosts, err error) {
 	if _, present := params["output"]; !present {
 		params["output"] = "extend"
