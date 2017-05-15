@@ -76,33 +76,3 @@ func (api *API) TriggerGetByID(id string) (res *Trigger, err error) {
 	}
 	return
 }
-
-// TriggersGetActive gets all current issues like on zabbix dashboard
-func (api *API) TriggersGetActive(params Params) (res Triggers, err error) {
-	if _, present := params["output"]; !present {
-		params["output"] = "extend"
-	}
-	params["expandDescription"] = 1
-	params["active"] = 1
-	params["withLastEventUnacknowledged"] = 1
-	params["monitored"] = 1
-	params["only_true"] = 1
-	params["skipDependent"] = 1
-	params["selectHosts"] = "host"
-
-	response, err := api.CallWithError("trigger.get", params)
-	if err != nil {
-		return
-	}
-	res = make(Triggers, len(response.Result.([]interface{})))
-	for i, h := range response.Result.([]interface{}) {
-		h2 := h.(map[string]interface{})
-		reflector.MapToStruct(h2, &res[i], reflector.Strconv, "json")
-
-		if hosts, ok := h2["hosts"]; ok {
-			reflector.MapsToStructs2(hosts.([]interface{}), &res[i].Hosts, reflector.Strconv, "json")
-		}
-	}
-
-	return
-}

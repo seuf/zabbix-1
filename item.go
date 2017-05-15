@@ -2,6 +2,7 @@ package zabbix
 
 import (
 	"fmt"
+
 	"github.com/AlekSi/reflector"
 )
 
@@ -63,6 +64,7 @@ type Item struct {
 	Error       string    `json:"error"`
 	History     int       `json:"history,omitempty"`
 	Trends      int       `json:"trends,omitempty"`
+	TriggersIds []string  `json:"triggers,omitempty"`
 
 	// Fields below used only when creating applications
 	ApplicationIds []string `json:"applications,omitempty"`
@@ -83,7 +85,7 @@ func (items Items) ByKey() (res map[string]Item) {
 	return
 }
 
-// Wrapper for item.get https://www.zabbix.com/documentation/2.2/manual/appendix/api/item/get
+// ItemsGet is a wrapper for item.get https://www.zabbix.com/documentation/2.4/manual/api/reference/item/get
 func (api *API) ItemsGet(params Params) (res Items, err error) {
 	if _, present := params["output"]; !present {
 		params["output"] = "extend"
@@ -97,9 +99,14 @@ func (api *API) ItemsGet(params Params) (res Items, err error) {
 	return
 }
 
-// Gets items by application Id.
-func (api *API) ItemsGetByApplicationId(id string) (res Items, err error) {
+// ItemsGetByApplicationID gets items by application Id.
+func (api *API) ItemsGetByApplicationID(id string) (res Items, err error) {
 	return api.ItemsGet(Params{"applicationids": id})
+}
+
+// ItemsGetByTriggerID gets items by trigger Id.
+func (api *API) ItemsGetByTriggerID(id string) (res Items, err error) {
+	return api.ItemsGet(Params{"triggerids": id})
 }
 
 // Wrapper for item.create: https://www.zabbix.com/documentation/2.2/manual/appendix/api/item/create
