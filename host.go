@@ -81,7 +81,7 @@ func (api *API) HostGetById(id string) (res *Host, err error) {
 	return
 }
 
-// Gets host by Host only if there is exactly 1 matching host.
+// HostGetByHost gets host by Host only if there is exactly 1 matching host.
 func (api *API) HostGetByHost(host string) (res *Host, err error) {
 	hosts, err := api.HostsGet(Params{"filter": map[string]string{"host": host}})
 	if err != nil {
