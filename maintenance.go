@@ -86,3 +86,30 @@ func (api *API) MaintenanceGetByID(id string) (res *Maintenance, err error) {
 	}
 	return
 }
+
+// MaintenanceGetByName returns maintenance by its name only if there is exactly 1 matching maintenance.
+func (api *API) MaintenanceGetByName(name string) (res *Maintenance, err error) {
+	maintenances, err := api.MaintenancesGet(Params{"filter": map[string]string{"name": name}})
+	if err != nil {
+		return
+	}
+	if len(maintenances) == 1 {
+		res = &maintenances[0]
+	} else {
+		e := ExpectedOneResult(len(maintenances))
+		err = &e
+	}
+	return
+}
+
+func (api *API) MaintenancesCreate(maintenances Maintenances) (err error) {
+	return
+}
+
+func (api *API) MaintenancesUpdate(maintenances Maintenances) (err error) {
+	return
+}
+
+func (api *API) MaintenancesDelete(maintenances Maintenances) (err error) {
+	return
+}
