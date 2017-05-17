@@ -1,7 +1,6 @@
 package zabbix_test
 
 import (
-	. "."
 	"log"
 	"math/rand"
 	"net/http"
@@ -9,6 +8,8 @@ import (
 	"regexp"
 	"testing"
 	"time"
+
+	. "."
 )
 
 var (
@@ -89,4 +90,13 @@ func ExampleAPI_Call() {
 	api.Login("user", "password")
 	res, _ := api.Call("item.get", Params{"itemids": "23970", "output": "extend"})
 	log.Print(res)
+}
+
+func TestLogout(t *testing.T) {
+	api := getAPI(t)
+	err := api.Logout()
+	if err != nil {
+		t.Fatal(err)
+	}
+	_api = nil
 }

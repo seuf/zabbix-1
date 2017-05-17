@@ -35,6 +35,12 @@ type Host struct {
 	TemplateIds TemplateIds    `json:"templates,omitempty"`
 }
 
+type HostID struct {
+	HostId string `json:"hostid"`
+}
+
+type HostIDs []HostID
+
 type Hosts []Host
 
 // HostsGet is a wrapper for host.get: https://www.zabbix.com/documentation/2.2/manual/appendix/api/host/get

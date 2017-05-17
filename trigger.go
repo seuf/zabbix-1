@@ -25,17 +25,10 @@ type Trigger struct {
 	Description string       `json:"description"`
 	Expression  string       `json:"expression"`
 	Error       string       `json:"error"`
-	Hosts       HostIds      `json:"hosts,omitempty"`
+	Hosts       Hosts        `json:"hosts,omitempty"`
 	Priority    PriorityType `json:"priority"`
 	Value       ValueType    `json:"value"`
 }
-
-type HostId struct {
-	HostId string `json:"hostid"`
-	Name   string `json:"name"`
-}
-
-type HostIds []HostId
 
 type Triggers []Trigger
 

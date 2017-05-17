@@ -1,6 +1,8 @@
 package zabbix
 
-import "github.com/AlekSi/reflector"
+import (
+	"github.com/AlekSi/reflector"
+)
 
 type (
 	MaintType  int
@@ -19,25 +21,29 @@ const (
 
 // Maintenance struct - https://www.zabbix.com/documentation/2.4/manual/api/reference/maintenance/object#maintenance
 type Maintenance struct {
-	MaintenanceID   string      `json:"maintenanceid"`
-	Name            string      `json:"name"`
-	ActiveSince     int64       `json:"active_since"`
-	ActiveTill      int64       `json:"active_till"`
-	Description     string      `json:"description"`
-	MaintenanceType MaintType   `json:"maintenance_type"`
-	TimePeriods     TimePeriods `json:"timeperiods,omitempty"`
+	MaintenanceID   string       `json:"maintenanceid"`
+	Name            string       `json:"name"`
+	ActiveSince     int64        `json:"active_since"`
+	ActiveTill      int64        `json:"active_till"`
+	Description     string       `json:"description,omitempty"`
+	MaintenanceType MaintType    `json:"maintenance_type"`
+	HostIDs         HostIDs      `json:"hostids"`
+	HostGroupIDs    HostGroupIds `json:"groupids"`
+	Hosts           Hosts        `json:"hosts,omitempty"`
+	HostGroups      HostGroups   `json:"groups,omitempty"`
+	TimePeriods     TimePeriods  `json:"timeperiods,omitempty"`
 }
 
 // TimePeriod struct - https://www.zabbix.com/documentation/2.4/manual/api/reference/maintenance/object#time_period
 type TimePeriod struct {
 	TimePeriodID   string     `json:"timeperiodid"`
-	Day            string     `json:"day"`
-	DayOfWeek      int        `json:"dayofweek"`
-	Every          int        `json:"every"`
-	Month          int        `json:"month"`
-	Period         int64      `json:"period"`
-	StartDate      int64      `json:"start_date"`
-	StartTime      int64      `json:"start_time"`
+	Day            string     `json:"day,omitempty"`
+	DayOfWeek      int        `json:"dayofweek,omitempty"`
+	Every          int        `json:"every,omitempty"`
+	Month          int        `json:"month,omitempty"`
+	Period         int64      `json:"period,omitempty"`
+	StartDate      int64      `json:"start_date,omitempty"`
+	StartTime      int64      `json:"start_time,omitempty"`
 	TimePeriodType PeriodType `json:"timeperiod_type"`
 }
 
@@ -53,6 +59,15 @@ func (api *API) MaintenancesGet(params Params) (res Maintenances, err error) {
 	if _, present := params["output"]; !present {
 		params["output"] = "extend"
 	}
+	if _, present := params["selectHosts"]; !present {
+		params["selectHosts"] = "extend"
+	}
+	if _, present := params["selectGroups"]; !present {
+		params["selectGroups"] = "extend"
+	}
+	if _, present := params["selectTimeperiods"]; !present {
+		params["selectTimeperiods"] = "extend"
+	}
 	response, err := api.CallWithError("maintenance.get", params)
 	if err != nil {
 		return
@@ -62,6 +77,12 @@ func (api *API) MaintenancesGet(params Params) (res Maintenances, err error) {
 		h2 := h.(map[string]interface{})
 		reflector.MapToStruct(h2, &res[i], reflector.Strconv, "json")
 
+		if hosts, ok := h2["hosts"]; ok {
+			reflector.MapsToStructs2(hosts.([]interface{}), &res[i].Hosts, reflector.Strconv, "json")
+		}
+		if hostgroups, ok := h2["groups"]; ok {
+			reflector.MapsToStructs2(hostgroups.([]interface{}), &res[i].HostGroups, reflector.Strconv, "json")
+		}
 		if timeperiods, ok := h2["timeperiods"]; ok {
 			reflector.MapsToStructs2(timeperiods.([]interface{}), &res[i].TimePeriods, reflector.Strconv, "json")
 		}
@@ -102,7 +123,17 @@ func (api *API) MaintenanceGetByName(name string) (res *Maintenance, err error) 
 	return
 }
 
+// MaintenancesCreate creates maintenances using maintenance.create - https://www.zabbix.com/documentation/2.4/manual/api/reference/maintenance/create
 func (api *API) MaintenancesCreate(maintenances Maintenances) (err error) {
+	response, err := api.CallWithError("maintenance.create", maintenances)
+	if err != nil {
+		return
+	}
+	result := response.Result.(map[string]interface{})
+	maintenanceids := result["maintenanceids"].([]interface{})
+	for i, id := range maintenanceids {
+		maintenances[i].MaintenanceID = id.(string)
+	}
 	return
 }
 

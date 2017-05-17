@@ -164,3 +164,17 @@ func (api *API) Version() (v string, err error) {
 	v = response.Result.(string)
 	return
 }
+
+// Calls "user.logout" API method.
+// This method modifies API structure and should not be called concurrently with other methods.
+func (api *API) Logout() (err error) {
+	_, err = api.CallWithError("user.logout", Params{})
+	if err != nil {
+		return
+	}
+	//if ! response.Result.(bool) {
+	//	return errors.New("Logout failed")
+	//}
+	api.Auth = ""
+	return
+}
