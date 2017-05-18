@@ -35,11 +35,11 @@ type Host struct {
 	TemplateIds TemplateIds    `json:"templates,omitempty"`
 }
 
-type HostID struct {
+/*type HostID struct {
 	HostId string `json:"hostid"`
-}
+}*/
 
-type HostIDs []HostID
+//type HostIDs []HostID
 
 type Hosts []Host
 

@@ -1,6 +1,8 @@
 package zabbix
 
 import (
+	"fmt"
+
 	"github.com/AlekSi/reflector"
 )
 
@@ -21,17 +23,17 @@ const (
 
 // Maintenance struct - https://www.zabbix.com/documentation/2.4/manual/api/reference/maintenance/object#maintenance
 type Maintenance struct {
-	MaintenanceID   string       `json:"maintenanceid"`
-	Name            string       `json:"name"`
-	ActiveSince     int64        `json:"active_since"`
-	ActiveTill      int64        `json:"active_till"`
-	Description     string       `json:"description,omitempty"`
-	MaintenanceType MaintType    `json:"maintenance_type"`
-	HostIDs         HostIDs      `json:"hostids"`
-	HostGroupIDs    HostGroupIds `json:"groupids"`
-	Hosts           Hosts        `json:"hosts,omitempty"`
-	HostGroups      HostGroups   `json:"groups,omitempty"`
-	TimePeriods     TimePeriods  `json:"timeperiods,omitempty"`
+	MaintenanceID   string      `json:"maintenanceid,omitepmty"`
+	Name            string      `json:"name"`
+	ActiveSince     int64       `json:"active_since"`
+	ActiveTill      int64       `json:"active_till"`
+	Description     string      `json:"description,omitempty"`
+	MaintenanceType MaintType   `json:"maintenance_type"`
+	HostIDs         []string    `json:"hostids"`
+	HostGroupIDs    []string    `json:"groupids"`
+	Hosts           Hosts       `json:"hosts,omitempty"`
+	HostGroups      HostGroups  `json:"groups,omitempty"`
+	TimePeriods     TimePeriods `json:"timeperiods,omitempty"`
 }
 
 // TimePeriod struct - https://www.zabbix.com/documentation/2.4/manual/api/reference/maintenance/object#time_period
@@ -129,7 +131,9 @@ func (api *API) MaintenancesCreate(maintenances Maintenances) (err error) {
 	if err != nil {
 		return
 	}
+	fmt.Println("Response:", response)
 	result := response.Result.(map[string]interface{})
+	fmt.Println("Result:", result)
 	maintenanceids := result["maintenanceids"].([]interface{})
 	for i, id := range maintenanceids {
 		maintenances[i].MaintenanceID = id.(string)
@@ -137,10 +141,38 @@ func (api *API) MaintenancesCreate(maintenances Maintenances) (err error) {
 	return
 }
 
+// MaintenancesUpdate updates maintenance properties according to - https://www.zabbix.com/documentation/2.4/manual/api/reference/maintenance/update
 func (api *API) MaintenancesUpdate(maintenances Maintenances) (err error) {
 	return
 }
 
+// MaintenancesDelete gets ids of all maintenances from params and calls MaintenanceDeleteByIDs with those ids
 func (api *API) MaintenancesDelete(maintenances Maintenances) (err error) {
+	ids := make([]string, len(maintenances))
+	for i, maintenance := range maintenances {
+		ids[i] = maintenance.MaintenanceID
+	}
+
+	err = api.MaintenancesDeleteByIDs(ids)
+	if err == nil {
+		for i := range maintenances {
+			maintenances[i].MaintenanceID = ""
+		}
+	}
+	return
+}
+
+// MaintenancesDeleteByIDs deletes maintenances using their ids: https://www.zabbix.com/documentation/2.4/manual/api/reference/maintenance/delete
+func (api *API) MaintenancesDeleteByIDs(ids []string) (err error) {
+	response, err := api.CallWithError("maintenance.delete", ids)
+	if err != nil {
+		return
+	}
+
+	result := response.Result.(map[string]interface{})
+	maintenanceids := result["maintenanceids"].([]interface{})
+	if len(ids) != len(maintenanceids) {
+		err = &ExpectedMore{len(ids), len(maintenanceids)}
+	}
 	return
 }
