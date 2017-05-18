@@ -1,8 +1,6 @@
 package zabbix
 
 import (
-	"fmt"
-
 	"github.com/AlekSi/reflector"
 )
 
@@ -95,14 +93,14 @@ func (api *API) MaintenancesGet(params Params) (res Maintenances, err error) {
 }
 
 // MaintenanceGetByID returns maintenance by ID only if there is exactly 1 matching maintenance.
-func (api *API) MaintenanceGetByID(id string) (res *Maintenance, err error) {
+func (api *API) MaintenanceGetByID(id string) (res Maintenance, err error) {
 	maintenances, err := api.MaintenancesGet(Params{"maintenanceids": id})
 	if err != nil {
 		return
 	}
 
 	if len(maintenances) == 1 {
-		res = &maintenances[0]
+		res = maintenances[0]
 	} else {
 		e := ExpectedOneResult(len(maintenances))
 		err = &e
@@ -111,13 +109,13 @@ func (api *API) MaintenanceGetByID(id string) (res *Maintenance, err error) {
 }
 
 // MaintenanceGetByName returns maintenance by its name only if there is exactly 1 matching maintenance.
-func (api *API) MaintenanceGetByName(name string) (res *Maintenance, err error) {
+func (api *API) MaintenanceGetByName(name string) (res Maintenance, err error) {
 	maintenances, err := api.MaintenancesGet(Params{"filter": map[string]string{"name": name}})
 	if err != nil {
 		return
 	}
 	if len(maintenances) == 1 {
-		res = &maintenances[0]
+		res = maintenances[0]
 	} else {
 		e := ExpectedOneResult(len(maintenances))
 		err = &e
@@ -131,9 +129,9 @@ func (api *API) MaintenancesCreate(maintenances Maintenances) (err error) {
 	if err != nil {
 		return
 	}
-	fmt.Println("Response:", response)
+
 	result := response.Result.(map[string]interface{})
-	fmt.Println("Result:", result)
+
 	maintenanceids := result["maintenanceids"].([]interface{})
 	for i, id := range maintenanceids {
 		maintenances[i].MaintenanceID = id.(string)
@@ -143,6 +141,21 @@ func (api *API) MaintenancesCreate(maintenances Maintenances) (err error) {
 
 // MaintenancesUpdate updates maintenance properties according to - https://www.zabbix.com/documentation/2.4/manual/api/reference/maintenance/update
 func (api *API) MaintenancesUpdate(maintenances Maintenances) (err error) {
+	ids := make([]string, len(maintenances))
+	for i, maintenance := range maintenances {
+		ids[i] = maintenance.MaintenanceID
+	}
+	response, err := api.CallWithError("maintenance.update", maintenances)
+	if err != nil {
+		return
+	}
+
+	// check if result returned same amount of ids as we've updated
+	result := response.Result.(map[string]interface{})
+	maintenanceids := result["maintenanceids"].([]interface{})
+	if len(ids) != len(maintenanceids) {
+		err = &ExpectedMore{len(ids), len(maintenanceids)}
+	}
 	return
 }
 
