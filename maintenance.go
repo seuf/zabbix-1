@@ -1,7 +1,7 @@
 package zabbix
 
 import (
-	"github.com/AlekSi/reflector"
+	"github.com/mitchellh/mapstructure"
 )
 
 type (
@@ -75,16 +75,18 @@ func (api *API) MaintenancesGet(params Params) (res Maintenances, err error) {
 	res = make(Maintenances, len(response.Result.([]interface{})))
 	for i, h := range response.Result.([]interface{}) {
 		h2 := h.(map[string]interface{})
-		reflector.MapToStruct(h2, &res[i], reflector.Strconv, "json")
+		mapstructure.Decode(h2, &res[i])
 
 		if hosts, ok := h2["hosts"]; ok {
-			reflector.MapsToStructs2(hosts.([]interface{}), &res[i].Hosts, reflector.Strconv, "json")
+			mapstructure.Decode(hosts.([]interface{}), &res[i].Hosts)
+
 		}
 		if hostgroups, ok := h2["groups"]; ok {
-			reflector.MapsToStructs2(hostgroups.([]interface{}), &res[i].HostGroups, reflector.Strconv, "json")
+			mapstructure.Decode(hostgroups.([]interface{}), &res[i].HostGroups)
 		}
 		if timeperiods, ok := h2["timeperiods"]; ok {
-			reflector.MapsToStructs2(timeperiods.([]interface{}), &res[i].TimePeriods, reflector.Strconv, "json")
+			mapstructure.Decode(timeperiods.([]interface{}), &res[i].TimePeriods)
+
 		}
 
 	}

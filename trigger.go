@@ -1,6 +1,6 @@
 package zabbix
 
-import "github.com/AlekSi/reflector"
+import "github.com/mitchellh/mapstructure"
 
 type (
 	PriorityType int
@@ -44,10 +44,11 @@ func (api *API) TriggersGet(params Params) (res Triggers, err error) {
 	res = make(Triggers, len(response.Result.([]interface{})))
 	for i, h := range response.Result.([]interface{}) {
 		h2 := h.(map[string]interface{})
-		reflector.MapToStruct(h2, &res[i], reflector.Strconv, "json")
+		mapstructure.Decode(h2, &res[i])
 
 		if hosts, ok := h2["hosts"]; ok {
-			reflector.MapsToStructs2(hosts.([]interface{}), &res[i].Hosts, reflector.Strconv, "json")
+			mapstructure.Decode(hosts.([]interface{}), &res[i].Hosts)
+
 		}
 	}
 

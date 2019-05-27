@@ -1,6 +1,6 @@
 package zabbix
 
-import "github.com/AlekSi/reflector"
+import "github.com/mitchellh/mapstructure"
 
 // https://www.zabbix.com/documentation/2.4/manual/api/reference/history/object
 type History struct {
@@ -28,6 +28,7 @@ func (api *API) HistoriesGet(params Params) (res Histories, err error) {
 		return
 	}
 
-	reflector.MapsToStructs2(response.Result.([]interface{}), &res, reflector.Strconv, "json")
+	mapstructure.Decode(response.Result.([]interface{}), &res)
+
 	return
 }

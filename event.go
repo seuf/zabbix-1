@@ -1,6 +1,6 @@
 package zabbix
 
-import "github.com/AlekSi/reflector"
+import "github.com/mitchellh/mapstructure"
 
 type (
 	ObjectType     int
@@ -77,13 +77,14 @@ func (api *API) EventsGet(params Params) (res Events, err error) {
 	res = make(Events, len(response.Result.([]interface{})))
 	for i, h := range response.Result.([]interface{}) {
 		h2 := h.(map[string]interface{})
-		reflector.MapToStruct(h2, &res[i], reflector.Strconv, "json")
+		mapstructure.Decode(h2, &res[1])
 
 		if triggers, ok := h2["triggers"]; ok {
-			reflector.MapsToStructs2(triggers.([]interface{}), &res[i].Triggers, reflector.Strconv, "json")
+			mapstructure.Decode(triggers.([]interface{}), &res[i].Triggers)
+
 		}
 		if acknowledges, ok := h2["acknowledges"]; ok {
-			reflector.MapsToStructs2(acknowledges.([]interface{}), &res[i].Acknowledges, reflector.Strconv, "json")
+			mapstructure.Decode(acknowledges.([]interface{}), &res[i].Acknowledges)
 		}
 	}
 

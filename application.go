@@ -1,8 +1,6 @@
 package zabbix
 
-import (
-	"github.com/AlekSi/reflector"
-)
+import "github.com/mitchellh/mapstructure"
 
 // https://www.zabbix.com/documentation/2.2/manual/appendix/api/application/definitions
 type Application struct {
@@ -24,7 +22,7 @@ func (api *API) ApplicationsGet(params Params) (res Applications, err error) {
 		return
 	}
 
-	reflector.MapsToStructs2(response.Result.([]interface{}), &res, reflector.Strconv, "json")
+	mapstructure.Decode(response.Result.([]interface{}), &res)
 	return
 }
 

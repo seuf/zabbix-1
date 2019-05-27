@@ -1,8 +1,6 @@
 package zabbix
 
-import (
-	"github.com/AlekSi/reflector"
-)
+import "github.com/mitchellh/mapstructure"
 
 // https://www.zabbix.com/documentation/2.2/manual/api/reference/template/object
 type Template struct {
@@ -30,6 +28,7 @@ func (api *API) TemplatesGet(params Params) (res Templates, err error) {
 		return
 	}
 
-	reflector.MapsToStructs2(response.Result.([]interface{}), &res, reflector.Strconv, "json")
+	mapstructure.Decode(response.Result.([]interface{}), &res)
+
 	return
 }

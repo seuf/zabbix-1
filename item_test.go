@@ -1,8 +1,9 @@
 package zabbix_test
 
 import (
-	. "."
 	"testing"
+
+	. "."
 )
 
 func CreateItem(app *Application, t *testing.T) *Item {
@@ -39,7 +40,7 @@ func TestItems(t *testing.T) {
 	app := CreateApplication(host, t)
 	defer DeleteApplication(app, t)
 
-	items, err := api.ItemsGetByApplicationId(app.ApplicationId)
+	items, err := api.ItemsGetByApplicationID(app.ApplicationId)
 	if err != nil {
 		t.Fatal(err)
 	}
